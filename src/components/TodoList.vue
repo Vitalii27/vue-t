@@ -7,8 +7,15 @@
             <button @click.prevent="addTodo" class="btn-floating btn-large waves-effect waves-light red"><i
                     class="material-icons">add</i></button>
         </div>
+        <transition name="fadeIn" class="filter-list">
+            <div v-if="todos.length >= 2">
+                <button class="waves-effect waves-light btn black" @click="filter = 'all'">All</button>
+                <button class="waves-effect waves-light btn purpure" @click="filter = 'do'">Do</button>
+                <button class="waves-effect waves-light btn green" @click="filter = 'done'">Done</button>
+            </div>
+        </transition>
         <transition-group name="fade" tag="ul" class="todo-list">
-            <li class="todo-item fade" v-for="(todo, index) in todos" :key="todo.id">
+            <li class="todo-item fade" v-for="(todo, index) in todosFiltered" :key="todo.id">
                 <div class="todo-holder" :class="{editing: todo.editing}">
                     <label class="todo-wrap">
                         <input type="checkbox" class="filled-in" v-model="todo.completed"/>
@@ -41,6 +48,7 @@
             </label>
             <span><strong>{{remaining}}</strong> item left</span>
         </div>
+
     </div>
 </template>
 
@@ -52,15 +60,29 @@
                 newTitle: '',
                 todoId: 0,
                 todos: [],
+                filter: 'all'
             }
         },
         computed: {
+
+            todosFiltered() {
+                if (this.filter === 'all') {
+                    return this.todos
+                }
+                if (this.filter === 'done') {
+                    return this.todos.filter(todo => todo.completed)
+                }
+                if (this.filter === 'do') {
+                    return this.todos.filter(todo => !todo.completed)
+                }
+                return this.todos
+            },
             remaining() {
                 return this.todos.filter(todo => !todo.completed).length
             },
             anyRemaining() {
                 return this.remaining != 0
-            }
+            },
         },
         methods: {
             addTodo() {
@@ -189,8 +211,7 @@
     }
 
     .fade {
-        transition: all 0.5s;
-
+        transition: all 0.3s;
     }
 
     .fade-enter, .fade-leave-to
@@ -198,21 +219,33 @@
     {
         opacity: 0;
         transform: scale(0);
+        position: absolute;
     }
 
     .fade-enter-to {
         opacity: 1;
         transform: scale(1);
+
     }
 
     .fade-leave-active {
         position: absolute;
-        max-width: 500px;
+        max-width: 600px;
         width: 100%;
     }
 
     .fade-move {
         opacity: 1;
-        transition: all 0.5s;
+        transition: all 0.3s;
+
+    }
+
+    .fadeIn-enter-active, .fadeIn-leave-active {
+        transition: opacity .5s;
+    }
+
+    .fadeIn-enter, .fadeIn-leave-to /* .fade-leave-active below version 2.1.8 */
+    {
+        opacity: 0;
     }
 </style>
